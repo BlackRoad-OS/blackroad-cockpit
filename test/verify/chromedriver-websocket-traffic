@@ -1,0 +1,6 @@
+#!/usr/bin/python3 -cimport os, sys; os.execv(os.path.dirname(sys.argv[1]) + "/../common/pywrap", sys.argv)
+
+import testlib
+
+b = testlib.Browser("http//localhost:9090", "foo", None)
+testlib.sit()

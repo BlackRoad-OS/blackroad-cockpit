@@ -1,0 +1,270 @@
+# BlackRoad Multi-Service Integration Hub
+# Unified endpoint configuration for all services
+# Maintains consistency across the million repos
+
+version: "2.0"
+hub:
+  name: "BlackRoad Integration Hub"
+  state_backend: cloudflare_kv
+  crm_backend: salesforce
+
+# Cloud Services
+cloud:
+  cloudflare:
+    enabled: true
+    services:
+      - pages:
+          project: blackroad-cockpit
+          branch: main
+          build_command: "npm run build"
+
+      - workers:
+          name: blackroad-state-worker
+          routes:
+            - "api.blackroad.systems/*"
+
+      - kv:
+          namespace: BLACKROAD_STATE
+          bindings:
+            - project_state
+            - agent_tasks
+            - hash_registry
+
+      - r2:
+          bucket: blackroad-artifacts
+
+    secrets:
+      - CLOUDFLARE_API_TOKEN
+      - CLOUDFLARE_ACCOUNT_ID
+
+  vercel:
+    enabled: true
+    project: blackroad-cockpit
+    framework: custom
+    build_command: "npm run build"
+    output_directory: "dist"
+    regions: ["sfo1", "iad1"]
+    env_vars:
+      - BLACKROAD_ENV
+      - API_ENDPOINT
+    preview_comments: true
+
+  digital_ocean:
+    enabled: true
+    services:
+      - app_platform:
+          name: blackroad-cockpit
+          region: sfo
+          instance_size: basic-xxs
+
+      - droplets:
+          tag: blackroad-fleet
+          monitoring: true
+
+      - spaces:
+          bucket: blackroad-backups
+          region: sfo3
+
+    secrets:
+      - DO_API_TOKEN
+      - DO_SPACES_KEY
+      - DO_SPACES_SECRET
+
+# AI Services
+ai:
+  claude:
+    enabled: true
+    model: claude-opus-4-5-20251101
+    endpoints:
+      - api.anthropic.com
+    use_cases:
+      - code_review
+      - pr_analysis
+      - agent_orchestration
+    secrets:
+      - ANTHROPIC_API_KEY
+
+  agents:
+    autonomous_agent:
+      enabled: true
+      schedule: "0 */6 * * *"
+      capabilities:
+        - test_execution
+        - build_validation
+        - auto_merge
+        - pr_creation
+
+# Hardware / IoT
+hardware:
+  raspberry_pi:
+    enabled: true
+    fleet:
+      - name: pi-cluster-01
+        type: Pi 5
+        role: edge_compute
+
+      - name: pi-cluster-02
+        type: Pi 4
+        role: monitoring
+
+      - name: pi-zero-fleet
+        type: Pi Zero 2W
+        role: sensor_nodes
+
+    connectivity:
+      - ssh: true
+      - mqtt: true
+      - tailscale: true
+
+    deployment:
+      method: ansible
+      playbook: .blackroad/ansible/pi-deploy.yml
+
+# Mobile / iOS Apps
+ios_apps:
+  termius:
+    enabled: true
+    description: "SSH client for remote management"
+    use_cases:
+      - server_access
+      - pi_management
+      - emergency_fixes
+    sync:
+      hosts: true
+      keys: true
+      snippets: true
+
+  ish:
+    enabled: true
+    description: "Linux shell on iOS"
+    use_cases:
+      - mobile_development
+      - quick_fixes
+      - script_execution
+    home_directory: /root/blackroad
+
+  shellfish:
+    enabled: true
+    description: "SFTP/SSH client"
+    use_cases:
+      - file_management
+      - quick_edits
+      - log_viewing
+
+  working_copy:
+    enabled: true
+    description: "Git client for iOS"
+    use_cases:
+      - code_review
+      - quick_commits
+      - branch_management
+    repositories:
+      - blackroad-cockpit
+      - blackroad-*
+    sync_frequency: on_push
+
+  pyto:
+    enabled: true
+    description: "Python IDE for iOS"
+    use_cases:
+      - script_development
+      - automation_testing
+      - data_analysis
+    packages:
+      - requests
+      - pyyaml
+      - cryptography
+
+# CRM & State Management
+crm:
+  salesforce:
+    enabled: true
+    org_type: developer
+    objects:
+      - Project__c:
+          fields:
+            - Name
+            - Status__c
+            - Repository__c
+            - LastSync__c
+
+      - Task__c:
+          fields:
+            - Name
+            - Project__c
+            - Assignee__c
+            - DueDate__c
+            - Priority__c
+
+      - Integration__c:
+          fields:
+            - Name
+            - Endpoint__c
+            - Status__c
+            - LastPing__c
+
+    flows:
+      - GitHub_Issue_to_Task
+      - PR_Merged_to_Closed_Won
+      - Deploy_Success_Notification
+
+    secrets:
+      - SF_CLIENT_ID
+      - SF_CLIENT_SECRET
+      - SF_USERNAME
+      - SF_PASSWORD
+      - SF_SECURITY_TOKEN
+
+# State Sync Configuration
+state_sync:
+  primary: cloudflare_kv
+  secondary: salesforce
+
+  sync_rules:
+    - entity: project
+      sources: [github, salesforce]
+      target: cloudflare_kv
+      frequency: on_change
+
+    - entity: task
+      sources: [github_issues, salesforce_tasks]
+      target: cloudflare_kv
+      frequency: "*/5 * * * *"
+
+    - entity: deployment
+      sources: [vercel, cloudflare, digital_ocean]
+      target: cloudflare_kv
+      frequency: on_deploy
+
+# Health Checks
+health:
+  endpoints:
+    - name: cloudflare_api
+      url: https://api.cloudflare.com/client/v4/user
+      method: GET
+      expected_status: 200
+
+    - name: vercel_api
+      url: https://api.vercel.com/v2/user
+      method: GET
+      expected_status: 200
+
+    - name: digitalocean_api
+      url: https://api.digitalocean.com/v2/account
+      method: GET
+      expected_status: 200
+
+    - name: claude_api
+      url: https://api.anthropic.com/v1/messages
+      method: POST
+      expected_status: 200
+
+    - name: salesforce_api
+      url: https://login.salesforce.com/services/oauth2/token
+      method: POST
+      expected_status: 200
+
+  schedule: "*/15 * * * *"
+  alert_channels:
+    - github_issues
+    - termius_notification

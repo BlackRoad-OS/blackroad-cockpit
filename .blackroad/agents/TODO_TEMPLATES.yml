@@ -1,0 +1,288 @@
+# BlackRoad Agent Todo Templates
+# Pre-built task breakdowns for common operations
+# Agents should use these as starting points
+
+version: "1.0"
+
+templates:
+  # Basic feature implementation
+  feature_implementation:
+    name: "Feature Implementation"
+    description: "Standard workflow for implementing a new feature"
+    todos:
+      - content: "Research existing code and patterns"
+        activeForm: "Researching existing code and patterns"
+        estimate: exploration
+
+      - content: "Plan implementation approach"
+        activeForm: "Planning implementation approach"
+        estimate: quick
+
+      - content: "Create feature branch"
+        activeForm: "Creating feature branch"
+        estimate: quick
+
+      - content: "Implement core functionality"
+        activeForm: "Implementing core functionality"
+        estimate: varies
+
+      - content: "Add unit tests"
+        activeForm: "Adding unit tests"
+        estimate: medium
+
+      - content: "Add integration tests"
+        activeForm: "Adding integration tests"
+        estimate: medium
+
+      - content: "Update documentation"
+        activeForm: "Updating documentation"
+        estimate: quick
+
+      - content: "Run pre-PR checks"
+        activeForm: "Running pre-PR checks"
+        estimate: quick
+
+      - content: "Create pull request"
+        activeForm: "Creating pull request"
+        estimate: quick
+
+  # Bug fix workflow
+  bug_fix:
+    name: "Bug Fix"
+    description: "Standard workflow for fixing a bug"
+    todos:
+      - content: "Reproduce the bug"
+        activeForm: "Reproducing the bug"
+        estimate: exploration
+
+      - content: "Identify root cause"
+        activeForm: "Identifying root cause"
+        estimate: varies
+
+      - content: "Create fix branch"
+        activeForm: "Creating fix branch"
+        estimate: quick
+
+      - content: "Implement fix"
+        activeForm: "Implementing fix"
+        estimate: varies
+
+      - content: "Add regression test"
+        activeForm: "Adding regression test"
+        estimate: quick
+
+      - content: "Verify fix locally"
+        activeForm: "Verifying fix locally"
+        estimate: quick
+
+      - content: "Run full test suite"
+        activeForm: "Running full test suite"
+        estimate: medium
+
+      - content: "Create pull request"
+        activeForm: "Creating pull request"
+        estimate: quick
+
+  # Integration setup
+  integration_setup:
+    name: "Integration Setup"
+    description: "Adding a new service integration"
+    todos:
+      - content: "Review service API documentation"
+        activeForm: "Reviewing service API documentation"
+        estimate: exploration
+
+      - content: "Add endpoint configuration"
+        activeForm: "Adding endpoint configuration"
+        estimate: quick
+
+      - content: "Implement authentication"
+        activeForm: "Implementing authentication"
+        estimate: medium
+
+      - content: "Create API client/wrapper"
+        activeForm: "Creating API client"
+        estimate: medium
+
+      - content: "Add health check endpoint"
+        activeForm: "Adding health check endpoint"
+        estimate: quick
+
+      - content: "Write integration tests"
+        activeForm: "Writing integration tests"
+        estimate: medium
+
+      - content: "Update endpoints.yml"
+        activeForm: "Updating endpoints configuration"
+        estimate: quick
+
+      - content: "Test connectivity"
+        activeForm: "Testing connectivity"
+        estimate: quick
+
+      - content: "Document integration"
+        activeForm: "Documenting integration"
+        estimate: quick
+
+  # PR review workflow
+  pr_review:
+    name: "PR Review"
+    description: "Reviewing and validating a pull request"
+    todos:
+      - content: "Read PR description and linked issues"
+        activeForm: "Reading PR description"
+        estimate: quick
+
+      - content: "Review changed files"
+        activeForm: "Reviewing changed files"
+        estimate: varies
+
+      - content: "Check test coverage"
+        activeForm: "Checking test coverage"
+        estimate: quick
+
+      - content: "Verify SHA-256 integrity"
+        activeForm: "Verifying SHA-256 integrity"
+        estimate: quick
+
+      - content: "Run tests locally"
+        activeForm: "Running tests locally"
+        estimate: medium
+
+      - content: "Check for security issues"
+        activeForm: "Checking for security issues"
+        estimate: medium
+
+      - content: "Provide feedback or approve"
+        activeForm: "Providing feedback"
+        estimate: quick
+
+  # Deployment workflow
+  deployment:
+    name: "Deployment"
+    description: "Deploying to production"
+    todos:
+      - content: "Verify all CI checks pass"
+        activeForm: "Verifying CI checks"
+        estimate: quick
+
+      - content: "Run SHA-infinity validation"
+        activeForm: "Running SHA-infinity validation"
+        estimate: quick
+
+      - content: "Deploy to staging"
+        activeForm: "Deploying to staging"
+        estimate: medium
+
+      - content: "Run smoke tests on staging"
+        activeForm: "Running smoke tests"
+        estimate: quick
+
+      - content: "Verify all endpoint connectivity"
+        activeForm: "Verifying endpoint connectivity"
+        estimate: quick
+
+      - content: "Deploy to production"
+        activeForm: "Deploying to production"
+        estimate: medium
+
+      - content: "Verify production deployment"
+        activeForm: "Verifying production deployment"
+        estimate: quick
+
+      - content: "Update Cloudflare KV state"
+        activeForm: "Updating Cloudflare state"
+        estimate: quick
+
+      - content: "Sync to Salesforce"
+        activeForm: "Syncing to Salesforce"
+        estimate: quick
+
+  # Multi-repo sync
+  multi_repo_sync:
+    name: "Multi-Repo Sync"
+    description: "Syncing changes across multiple repositories"
+    todos:
+      - content: "Identify affected repositories"
+        activeForm: "Identifying affected repositories"
+        estimate: exploration
+
+      - content: "Create branches in all repos"
+        activeForm: "Creating branches in all repos"
+        estimate: quick
+
+      - content: "Apply changes to each repo"
+        activeForm: "Applying changes to repos"
+        estimate: varies
+
+      - content: "Generate integrity manifest"
+        activeForm: "Generating integrity manifest"
+        estimate: quick
+
+      - content: "Run tests in all repos"
+        activeForm: "Running tests in all repos"
+        estimate: medium
+
+      - content: "Create PRs in all repos"
+        activeForm: "Creating PRs in all repos"
+        estimate: quick
+
+      - content: "Coordinate merge order"
+        activeForm: "Coordinating merge order"
+        estimate: quick
+
+      - content: "Verify cross-repo consistency"
+        activeForm: "Verifying cross-repo consistency"
+        estimate: quick
+
+  # Kanban project setup
+  kanban_setup:
+    name: "Kanban Project Setup"
+    description: "Setting up kanban board for a repository"
+    todos:
+      - content: "Create GitHub Project board"
+        activeForm: "Creating GitHub Project board"
+        estimate: quick
+
+      - content: "Configure columns and automation"
+        activeForm: "Configuring columns"
+        estimate: quick
+
+      - content: "Set up labels"
+        activeForm: "Setting up labels"
+        estimate: quick
+
+      - content: "Configure milestones"
+        activeForm: "Configuring milestones"
+        estimate: quick
+
+      - content: "Add issue templates"
+        activeForm: "Adding issue templates"
+        estimate: quick
+
+      - content: "Set up Cloudflare KV sync"
+        activeForm: "Setting up Cloudflare sync"
+        estimate: medium
+
+      - content: "Configure Salesforce integration"
+        activeForm: "Configuring Salesforce integration"
+        estimate: medium
+
+      - content: "Test automation rules"
+        activeForm: "Testing automation rules"
+        estimate: quick
+
+# Usage instructions for agents
+usage:
+  description: |
+    When starting a new task, agents should:
+    1. Identify the appropriate template
+    2. Copy the todos to their active task list
+    3. Customize as needed for the specific task
+    4. Mark todos as in_progress/completed as work progresses
+
+  example: |
+    # For a bug fix task:
+    todos = templates.bug_fix.todos
+    for todo in todos:
+        TodoWrite(todo)

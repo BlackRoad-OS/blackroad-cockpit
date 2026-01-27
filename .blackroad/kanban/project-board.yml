@@ -1,0 +1,151 @@
+# BlackRoad Kanban Project Board Configuration
+# Integrates GitHub Projects with Salesforce-style CRM workflow
+# State managed via Cloudflare KV + CRM sync
+
+version: "2.0"
+project:
+  name: "BlackRoad Cockpit - Kanban Board"
+  description: "Unified project management with multi-service integration"
+
+# Board Columns - Salesforce-style pipeline
+columns:
+  - name: "Backlog"
+    emoji: "📋"
+    automation:
+      - preset: issues_without_milestones
+      - state_sync: cloudflare_kv
+
+  - name: "Triage"
+    emoji: "🔍"
+    automation:
+      - preset: new_issues
+      - trigger: on_issue_created
+      - notify: [termius, slack]
+
+  - name: "To Do"
+    emoji: "📝"
+    automation:
+      - preset: ready_for_work
+      - sync: salesforce_opportunity
+      - state: open
+
+  - name: "In Progress"
+    emoji: "🚀"
+    automation:
+      - preset: active_development
+      - trigger: on_branch_created
+      - sync: [crm_activity, cloudflare_state]
+
+  - name: "Code Review"
+    emoji: "👀"
+    automation:
+      - preset: pull_requests
+      - trigger: on_pr_opened
+      - validate: sha256_integrity
+
+  - name: "Testing"
+    emoji: "🧪"
+    automation:
+      - preset: in_testing
+      - trigger: on_ci_pass
+      - endpoints: [vercel_preview, digital_ocean_staging]
+
+  - name: "Staging"
+    emoji: "🎭"
+    automation:
+      - preset: staging_deployment
+      - deploy_to: [vercel, cloudflare_pages]
+      - validate: sha_infinity_hash
+
+  - name: "Done"
+    emoji: "✅"
+    automation:
+      - preset: closed_issues
+      - trigger: on_merge
+      - sync: [salesforce_won, crm_closed]
+      - archive_after_days: 14
+
+# Labels for categorization
+labels:
+  priority:
+    - { name: "P0-critical", color: "FF1D6C", description: "Critical - immediate action" }
+    - { name: "P1-high", color: "F5A623", description: "High priority" }
+    - { name: "P2-medium", color: "2979FF", description: "Medium priority" }
+    - { name: "P3-low", color: "9C27B0", description: "Low priority" }
+
+  type:
+    - { name: "feature", color: "0E8A16", description: "New feature" }
+    - { name: "bug", color: "D73A4A", description: "Bug fix" }
+    - { name: "enhancement", color: "A2EEEF", description: "Enhancement" }
+    - { name: "integration", color: "7057FF", description: "Service integration" }
+    - { name: "agent-task", color: "FBCA04", description: "Autonomous agent task" }
+
+  service:
+    - { name: "cloudflare", color: "F48120" }
+    - { name: "salesforce", color: "00A1E0" }
+    - { name: "vercel", color: "000000" }
+    - { name: "digital-ocean", color: "0080FF" }
+    - { name: "claude-api", color: "D97706" }
+    - { name: "raspberry-pi", color: "C51A4A" }
+    - { name: "ios-apps", color: "147EFB" }
+
+# Milestones for release planning
+milestones:
+  - name: "v1.0 - Core Integration"
+    due_date: auto
+    objectives:
+      - All service endpoints connected
+      - SHA-256 validation active
+      - Agent automation running
+
+  - name: "v1.1 - State Sync"
+    due_date: auto
+    objectives:
+      - Cloudflare KV state management
+      - CRM bidirectional sync
+      - Cross-repo consistency
+
+# Views (like Salesforce reports)
+views:
+  - name: "Pipeline Overview"
+    type: board
+    group_by: column
+
+  - name: "By Service"
+    type: table
+    group_by: label:service
+
+  - name: "Agent Tasks"
+    type: table
+    filter: "label:agent-task"
+
+  - name: "PR Health"
+    type: table
+    filter: "is:pr"
+    columns: [title, status, checks, sha_hash, reviewers]
+
+# Automation rules
+automation:
+  # Auto-move based on events
+  rules:
+    - name: "PR Opened → Code Review"
+      trigger: pull_request.opened
+      action: move_to_column("Code Review")
+
+    - name: "CI Passed → Testing"
+      trigger: check_suite.completed
+      condition: conclusion == "success"
+      action: move_to_column("Testing")
+
+    - name: "Approved → Staging"
+      trigger: pull_request_review.submitted
+      condition: state == "approved"
+      action: move_to_column("Staging")
+
+    - name: "Merged → Done"
+      trigger: pull_request.closed
+      condition: merged == true
+      action:
+        - move_to_column("Done")
+        - sync_to_crm("closed_won")
+        - update_cloudflare_state("completed")
